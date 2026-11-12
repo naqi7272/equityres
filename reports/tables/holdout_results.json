@@ -1,0 +1,58 @@
+{
+  "holdout_start": "2024-11-12",
+  "holdout_end": "2026-11-11",
+  "first_return_date": "2024-11-13",
+  "last_train_date": "2024-10-25",
+  "family": "equal_weight",
+  "params": {},
+  "cost_bps": 5,
+  "holdout_accesses": 1,
+  "gross": {
+    "ann_return": 0.0068318455308176845,
+    "ann_vol": 0.0642785635586131,
+    "sharpe": 0.10628497515486626,
+    "max_drawdown": -0.08256567969423251,
+    "daily_turnover": 0.07437753994698028,
+    "hit_rate": 0.546,
+    "skew": -0.3884344994890836,
+    "kurtosis": 4.693643745459178,
+    "market_beta": 0.01564013245188505,
+    "n_days": 500
+  },
+  "net": {
+    "ann_return": -0.002539724502501841,
+    "ann_vol": 0.06427647019911349,
+    "sharpe": -0.039512507370650075,
+    "max_drawdown": -0.08591718665033132,
+    "daily_turnover": 0.07437753994698028,
+    "hit_rate": 0.542,
+    "skew": -0.3874535459949315,
+    "kurtosis": 4.693865461650691,
+    "market_beta": 0.015632570120098273,
+    "n_days": 500
+  },
+  "summary": {
+    "gross_ann_return": 0.0068318455308176845,
+    "gross_sharpe": 0.10628497515486626,
+    "net_ann_return": -0.002539724502501841,
+    "net_ann_vol": 0.06427647019911349,
+    "net_sharpe": -0.039512507370650075,
+    "net_max_drawdown": -0.08591718665033132,
+    "net_hit_rate": 0.542,
+    "net_skew": -0.3874535459949315,
+    "net_kurtosis": 4.693865461650691,
+    "net_market_beta": 0.015632570120098273,
+    "daily_turnover": 0.07437753994698028,
+    "break_even_bps": 3.6449845151494684,
+    "n_days": 500
+  },
+  "psr_vs_zero": 0.4778191087718858,
+  "ic": {
+    "mean_ic": 0.007380075017403328,
+    "ic_std": 0.14749236415780057,
+    "icir": 0.05003699723402265,
+    "nw_tstat": 0.5739477242410859,
+    "hit_rate": 0.5616161616161616,
+    "n_days": 495
+  }
+}

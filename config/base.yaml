@@ -1,0 +1,117 @@
+# Single source of truth for every parameter in the project.
+# The timing convention itself (one-day entry lag) lives in src/timing.py.
+seed: 42
+
+paths:
+  data_dir: data
+  reports_dir: reports
+  trials_file: trials.jsonl        # append-only trial registry
+
+data:
+  start: "2010-01-01"
+  end: null                        # null = latest; frozen in data/raw/meta.json on first download
+  # Membership history source. Wikipedia removed the change log from the live article, so the
+  # default is the public GitHub dataset fja05680/sp500 (dated member lists, checked to
+  # reproduce 496-507 members per day). Alternatives: auto (live Wikipedia, then an old Wikipedia
+  # revision, then GitHub) or wikipedia.
+  membership_source: github
+  benchmark: SPY                   # market proxy for betas and strategy beta
+  batch_size: 40
+  max_retries: 4
+  retry_sleep_seconds: 5
+  # Wikipedia lists historical tickers. Map renamed tickers to the current Yahoo symbol.
+  ticker_aliases:
+    FB: META
+
+quality:
+  max_abs_return: 0.5              # |1-day return| above this is flagged as extreme
+  split_tolerance: 0.02            # extreme return within 2% of a k:1 ratio = suspected split artifact
+  max_ffill_days: 0                # we never forward-fill prices
+
+liquidity:
+  min_price: 5.0
+  min_median_dollar_volume: 10000000   # USD per day
+  window: 20
+
+split:
+  holdout_months: 24
+
+label:
+  horizon: 5                       # primary h
+  robustness_horizons: [1, 21]
+  ic_decay_horizons: [1, 2, 3, 5, 10, 21]
+
+signals:
+  beta_window: 252
+  beta_min_periods: 126
+  # Signs are fixed a priori from the literature: higher value = higher expected return.
+  base:
+    momentum_12_1:     {func: momentum,          params: {lookback: 252, skip: 21}}
+    reversal_5d:       {func: reversal,          params: {window: 5}}
+    low_vol_60d:       {func: low_vol,           params: {window: 60}}
+    idio_vol_60d:      {func: idio_vol,          params: {window: 60}}
+    residual_mom:      {func: residual_momentum, params: {lookback: 252, skip: 21}}
+    high_52w:          {func: high_52w,          params: {window: 252}}
+    amihud_20d:        {func: amihud,            params: {window: 20}}
+    volume_trend:      {func: volume_trend,      params: {short: 20, long: 120}}
+  # Parameter variants. Each one is a logged trial (it widens the multiple-testing N).
+  variants:
+    momentum_6_1:      {func: momentum,          params: {lookback: 126, skip: 21}}
+    momentum_12_0:     {func: momentum,          params: {lookback: 252, skip: 0}}
+    reversal_10d:      {func: reversal,          params: {window: 10}}
+    reversal_21d:      {func: reversal,          params: {window: 21}}
+    low_vol_20d:       {func: low_vol,           params: {window: 20}}
+    low_vol_120d:      {func: low_vol,           params: {window: 120}}
+    idio_vol_20d:      {func: idio_vol,          params: {window: 20}}
+    residual_mom_6_1:  {func: residual_momentum, params: {lookback: 126, skip: 21}}
+    amihud_60d:        {func: amihud,            params: {window: 60}}
+    volume_trend_5_60: {func: volume_trend,      params: {short: 5, long: 60}}
+
+processing:
+  winsor_lower: 0.01
+  winsor_upper: 0.99
+  neutralize: true
+  min_names: 20
+
+validation:
+  n_splits: 5
+  embargo_days: 5
+  cpcv_groups: 6
+  cpcv_test_groups: 2
+  pbo_blocks: 10
+
+models:
+  equal_weight: [{}]
+  ic_weighted:  [{}]
+  # Ridge penalty = lambda * (number of training rows), so lambda is scale free.
+  ridge:
+    - {lam: 0.1}
+    - {lam: 1.0}
+    - {lam: 10.0}
+  lightgbm:
+    - {n_estimators: 100, max_depth: 2}
+    - {n_estimators: 100, max_depth: 3}
+    - {n_estimators: 300, max_depth: 2}
+    - {n_estimators: 300, max_depth: 3}
+  lightgbm_fixed:
+    learning_rate: 0.05
+    min_child_samples: 2000
+    subsample: 0.5
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    reg_lambda: 10.0
+    n_jobs: 4
+    train_every: 5                 # train on every 5th date: 5-day labels overlap, little is lost
+
+portfolio:
+  max_weight: 0.01                 # cap on |weight| of a single name (gross = 1)
+
+costs:
+  base_bps: 5                      # per side, charged on traded notional
+  grid_bps: [0, 2, 5, 10, 20]
+
+selection:
+  # Parsimony rule, fixed before any result was seen: a fitted model replaces
+  # equal weighting only if its purged-CV net return beats equal weight with a
+  # Newey-West t-statistic of at least this value. Otherwise equal weight is frozen.
+  min_tstat_over_equal_weight: 2.0

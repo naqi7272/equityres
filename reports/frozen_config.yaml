@@ -1,0 +1,15 @@
+family: equal_weight
+params: {}
+signals:
+- momentum_12_1
+- reversal_5d
+- low_vol_60d
+- idio_vol_60d
+- residual_mom
+- high_52w
+- amihud_20d
+- volume_trend
+h: 5
+cost_bps: 5
+base_config_hash: b104772952da
+trial_hash: 800ea349ad40

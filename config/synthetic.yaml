@@ -1,0 +1,16 @@
+# Overrides for the synthetic smoke test. Output goes to separate, git-ignored folders
+# so synthetic numbers can never be mistaken for research results.
+paths:
+  data_dir: data_synthetic
+  reports_dir: reports_synthetic
+  trials_file: reports_synthetic/trials.jsonl
+data:
+  synthetic: true
+  synthetic_tickers: 160
+liquidity:
+  min_median_dollar_volume: 1000000
+models:
+  lightgbm_fixed:
+    min_child_samples: 500
+portfolio:
+  max_weight: 0.03
